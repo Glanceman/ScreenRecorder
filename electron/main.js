@@ -1,8 +1,7 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-const mode="developement"
-
+const mode = app.commandLine.getSwitchValue("mode")
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -17,11 +16,13 @@ function createWindow () {
 
   //win.loadFile('index.html')
   if(mode==="development"){
+    win.webContents.openDevTools();
     win.loadURL("http://localhost:3000/")
-  }else{
+  }else if(mode==="deployment"){
     win.loadFile(path.join(__dirname,"../dist/index.html"))
   }
 
+  console.log("Current Mode:"+ mode);
 
 }
 
