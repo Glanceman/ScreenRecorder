@@ -7,8 +7,12 @@ function createWindow () {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    minHeight:600,
+    minWidth:800,
+    frame:false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      devTools:mode=="development"?true:false,
       nodeIntegration:true,
       contextIsolation:true,
     }
@@ -16,7 +20,6 @@ function createWindow () {
 
   //win.loadFile('index.html')
   if(mode==="development"){
-    win.webContents.openDevTools();
     win.loadURL("http://localhost:3000/")
   }else if(mode==="deployment"){
     win.loadFile(path.join(__dirname,"../dist/index.html"))
