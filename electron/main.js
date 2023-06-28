@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 
 const mode = app.commandLine.getSwitchValue("mode")
@@ -26,6 +26,27 @@ function createWindow () {
   }
 
   console.log("Current Mode:"+ mode);
+
+  ipcMain.on("close-window",()=>{
+    console.log("Close App")
+    app.quit();
+  })
+
+  ipcMain.on("max-window",()=>{
+    console.log("max App")
+    win.maximize()
+  })
+
+  ipcMain.on("min-window",()=>{
+    console.log("min App")
+    win.minimize();
+  })
+
+  ipcMain.on("unmax-window",()=>{
+    console.log("unmax App")
+    win.unmaximize();
+  })
+
 
 }
 
