@@ -5,25 +5,11 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  border-radius: 20px;
-  
-  background: linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.5) 0%,
-      rgba(0, 0, 0, 0.5) 100%
-    ),
-    radial-gradient(
-      156.55% 106.99% at 12.69% 17.33%,
-      #009bdd 0%,
-      rgba(0, 0, 0, 0) 100%
-    ),
-    radial-gradient(
-      150.32% 103.57% at 88.19% 89.67%,
-      #00cf15 0%,
-      rgba(0, 0, 0, 0) 100%
-    );
-  width: 100vw;
-  height: 100vh;
+  @apply w-screen h-screen rounded-3xl dark:bg-gradient-to-r dark:from-[#0f2027] dark:via-[#203a43] dark:to-[#2c5364] bg-gradient-to-r from-[#7F7FD5] via-[#86A8E7] to-[#91EAE4]
+}
+
+#app{
+  @apply w-full h-full
 }
 
 .framebar {

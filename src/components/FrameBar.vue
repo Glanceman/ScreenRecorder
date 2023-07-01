@@ -5,19 +5,19 @@
                 ScreenRecorder
             </div>
         </div>
-        <div class="operator flex flex-row-reverse items-center">
+        <div class="operator flex flex-row-reverse items-center text-white">
             <button class="px-1 text-lg hover:bg-red-500" @click="closeWindow">
                 <i class="bi bi-x-lg"></i>
             </button>
             <div>
-                <button v-if="fullScreen" class="px-1 text-lg hover:bg-slate-500" alt="fullscreen" @click="unMaxWindow">
+                <button v-if="fullScreen" class="px-1 text-lg hover:bg-slate-500  text-white" alt="fullscreen" @click="unMaxWindow">
                     <i class="bi bi-fullscreen-exit"></i>
                 </button>
-                <button v-else class="px-1 text-lg hover:bg-slate-500" alt="fullscreen" @click="maxWindow">
+                <button v-else class="px-1 text-lg hover:bg-slate-500 text-white" alt="fullscreen" @click="maxWindow">
                     <i class="bi bi-fullscreen"></i>
                 </button>
             </div>
-            <button class="px-1 text-lg hover:bg-slate-500" alt="minimize" @click="minWindow">
+            <button class="px-1 text-lg hover:bg-slate-500 text-white" alt="minimize" @click="minWindow">
                 <i class="bi bi-dash-lg"></i>
             </button>
         </div>

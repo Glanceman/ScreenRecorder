@@ -1,11 +1,13 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-import FrameBar from "./components/FrameBar.vue"
+import FrameBar from "./components/FrameBar.vue";
 </script>
 
 <template>
-  <FrameBar/>
-  <!--<RouterView />-->
+  <div class=" w-full h-full flex flex-col">
+    <FrameBar />
+    <RouterView />
+  </div>
 </template>
 
 <style></style>
