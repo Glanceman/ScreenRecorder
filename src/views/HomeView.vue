@@ -20,7 +20,7 @@
         :style="{ width: videoSize.width, height: videoSize.height }"
       ></video>
     </div>
-    
+
     <div
       class="p-4 w-full h-fit flex justify-evenly content-center items-center"
     >
@@ -34,8 +34,22 @@
           <i class="bi bi-play-fill"></i>
         </button>
       </div>
-      <div class="w-1/3">
-        <button ref="videoSource">Choose Video Resource</button>
+      <div class="w-1/3 flex justify-center">
+        <!-- <button ref="videoSource" @click="this.getVideoSources">Choose Video Resource</button> -->
+        <select
+          class="max-w-[150px]"
+          v-model="this.selectedVideoSource"
+          @change="this.selectVideoSource"
+        >
+          <option
+            v-for="videoSource in this.videoSources"
+            :key="videoSource.name"
+            :value="videoSource.id"
+            @click="this.selectVideoSource"
+          >
+            {{ videoSource.name }}
+          </option>
+        </select>
       </div>
     </div>
   </main>
@@ -49,6 +63,8 @@ export default {
         width: "100px",
         height: "100px",
       },
+      videoSources: [],
+      selectedVideoSource: null,
     };
   },
 
@@ -62,6 +78,52 @@ export default {
       this.videoSize.width = h * (16 / 9) + "px";
       this.videoSize.height = h + "px";
     },
+    async selectVideoSource() {
+      console.log("selected Source id: ", this.selectedVideoSource);
+      const constraints = {
+        // audio: {
+        //   mandatory: {
+        //     chromeMediaSource: "desktop",
+        //     chromeMediaSourceId: this.selectedVideoSource,
+        //   },
+        // },
+        audio:false,
+        video: {
+          mandatory: {
+            chromeMediaSource: "desktop",
+            chromeMediaSourceId: this.selectedVideoSource,
+          },
+        },
+      };
+
+      let stream = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        /* use the stream */
+        this.$refs["video"].srcObject = stream;
+        this.$refs["video"].play();
+      } catch (err) {
+        /* handle the error */
+        console.log(err);
+      }
+    },
+    async getVideoSources() {
+      //window.$ipc.popUpVideoSource();
+      this.videoSources = await window.$ipc.getVideoSources();
+      console.log(this.videoSources);
+      // const videoSources = await desktopCapturer.getSources({
+      //   types: ["screen", "windows"],
+      // });
+
+      // const videoOptionsMenu = Menu.buildFromTemplate(videoSources.map((source)=>{
+      //   return {
+      //     label:source.name,
+      //     click:()=>console.log(source)
+      //   }
+      // }))
+
+      // videoOptionsMenu.popup();
+    },
   },
 
   // Lifecycle hooks are called at different stages
@@ -69,6 +131,7 @@ export default {
   // This function will be called when the component is mounted.
   mounted() {
     this.resizeVideoElement();
+    this.getVideoSources();
     window.addEventListener("resize", this.resizeVideoElement);
   },
   unmounted() {

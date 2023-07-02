@@ -1,4 +1,4 @@
-const { contextBridge,ipcRenderer } = require('electron')
+const { contextBridge,ipcRenderer, desktopCapturer } = require('electron')
 
 window.addEventListener("DOMContentLoaded", () => {
   const replaceText = (selector, text) => {
@@ -9,6 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   for (const type of ["chrome", "node", "electron"]) {
     replaceText(`${type}-version`, process.versions[type]);
   }
+  console.log(require('electron'))
 });
 
 contextBridge.exposeInMainWorld('$ipc', {
@@ -16,4 +17,6 @@ contextBridge.exposeInMainWorld('$ipc', {
   minWindow:()=>ipcRenderer.send('min-window'),
   maxWindow:()=>ipcRenderer.send('max-window'),
   unMaxWindow:()=>ipcRenderer.send('unmax-window'),
+  popUpVideoSource:()=>ipcRenderer.invoke("popUpVideoSource"),
+  getVideoSources:()=>ipcRenderer.invoke("getVideoSources")
 })

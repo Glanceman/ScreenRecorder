@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain,desktopCapturer,Menu } = require('electron')
 const path = require('path')
 
 const mode = app.commandLine.getSwitchValue("mode")
@@ -47,8 +47,30 @@ function createWindow () {
     win.unmaximize();
   })
 
+  ipcMain.handle("popUpVideoSource", async ()=>{
+    const videoSources = await desktopCapturer.getSources({
+      types: ["screen", "window"],
+    });
+
+    const videoOptionsMenu = Menu.buildFromTemplate(videoSources.map((source)=>{
+      return {
+        label:source.name,
+        click:()=>console.log(source)
+      }
+    }))
+    videoOptionsMenu.popup();
+
+  })
+
+  ipcMain.handle("getVideoSources", async ()=>{
+    const videoSources = await desktopCapturer.getSources({
+      types: ["screen", "window"],
+    });
+    return videoSources;
+  })
 
 }
+
 
 app.whenReady().then(() => {
   createWindow()
