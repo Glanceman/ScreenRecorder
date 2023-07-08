@@ -25,18 +25,18 @@
       <div class="w-1/3"></div>
 
       <div class="w-1/3 flex justify-center">
-
         <Btn_Record v-model:trigger="trigger" @click="captureStream" />
       </div>
       <div class="w-1/3 flex justify-center">
         <!-- <button ref="videoSource" @click="this.getVideoSources">Choose Video Resource</button> -->
         <select
-          class="max-w-[150px] rounded-md py-1 w-full bg-gradient-to-tr from-teal-400 to-sky-500 text-white "
+          class="max-w-[150px] rounded-md py-1 w-full bg-gradient-to-tr from-teal-400 to-sky-500 text-white"
           v-model="selectedVideoSource"
-          @click=" getVideoSources"
+          @click="getVideoSources"
           @change="selectVideoSource"
         >
-          <option class=" text-black w-[150px]"
+          <option
+            class="text-black w-[150px]"
             v-for="videoSource in videoSources"
             :key="videoSource.name"
             :value="videoSource.id"
@@ -54,8 +54,8 @@ import { onMounted, onUnmounted, reactive, ref } from "vue";
 import Btn_Record from "../components/icons/Btn_Record.vue";
 
 export default {
-  components:{
-    Btn_Record :Btn_Record
+  components: {
+    Btn_Record: Btn_Record,
   },
 
   setup(pros, ctx) {
@@ -67,21 +67,32 @@ export default {
     const videoWrapper = ref(null);
     const video = ref(null);
     let timerID = null;
+
+    let mediaRecorder = null;
+    const recordedChunks = [];
+
     const captureStream = () => {
-      console.log("click outside");
+      if (trigger.value === true) {
+        console.log("Record");
+        recordedChunks.length = 0; //clear array
+        mediaRecorder.start();
+      } else {
+        console.log("Stop Record");
+        mediaRecorder.stop();
+      }
     };
 
     const resizeVideoElement = () => {
-      let height =videoWrapper.value.clientHeight 
-      let width = videoWrapper.value.clientWidth
+      let height = videoWrapper.value.clientHeight;
+      let width = videoWrapper.value.clientWidth;
       let h = Math.min(width / (16 / 9), height) * 0.9;
       videoSize.width = h * (16 / 9) + "px";
       videoSize.height = h + "px";
     };
 
     async function getVideoSources() {
-      let sources= await window.$ipc.getVideoSources();
-      videoSources.value=sources;
+      let sources = await window.$ipc.getVideoSources();
+      videoSources.value = sources;
     }
 
     async function selectVideoSource() {
@@ -93,7 +104,6 @@ export default {
             chromeMediaSourceId: selectedVideoSource.value,
           },
         },
-        audio: false,
         video: {
           mandatory: {
             chromeMediaSource: "desktop",
@@ -112,6 +122,22 @@ export default {
         /* handle the error */
         console.log(err);
       }
+
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "video/webm; codecs=vp9",
+        audio:true,
+      });
+      mediaRecorder.ondataavailable = onDataAvailableHandler;
+      mediaRecorder.onstop = onStopHandler;
+    }
+
+    function onDataAvailableHandler(e) {
+      recordedChunks.push(e.data);
+    }
+    function onStopHandler(e) {
+      // const buffer =ArrayBuffer.from(await blob.arrayBuffer());
+      // const filePath = await window.$ipc.selectFilePath();
+      window.$ipc.saveFileBuffer(recordedChunks);
     }
 
     onMounted(() => {
