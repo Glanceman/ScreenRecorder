@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <main
     class="container h-full w-full mx-auto flex flex-col items-center justify-around"
@@ -9,7 +7,6 @@
     >
       Screen Recorder
     </h1>
-
     <div
       ref="videoWrapper"
       class="relative m-2 max-w-full max-h-full w-full h-full"
@@ -18,6 +15,7 @@
         ref="video"
         class="bg-opacity-50 bg-gray-600"
         :style="{ width: videoSize.width, height: videoSize.height }"
+        muted
       ></video>
     </div>
 
@@ -27,25 +25,21 @@
       <div class="w-1/3"></div>
 
       <div class="w-1/3 flex justify-center">
-        <button
-          type="button"
-          class="w-14 h-14 rounded-3xl bg-gradient-to-tr from-teal-400 to-sky-500 text-5xl text-white transition duration-500 hover:scale-125"
-        >
-          <i class="bi bi-play-fill"></i>
-        </button>
+
+        <Btn_Record v-model:trigger="trigger" @click="captureStream" />
       </div>
       <div class="w-1/3 flex justify-center">
         <!-- <button ref="videoSource" @click="this.getVideoSources">Choose Video Resource</button> -->
         <select
-          class="max-w-[150px]"
-          v-model="this.selectedVideoSource"
-          @change="this.selectVideoSource"
+          class="max-w-[150px] rounded-md py-1 w-full bg-gradient-to-tr from-teal-400 to-sky-500 text-white "
+          v-model="selectedVideoSource"
+          @click=" getVideoSources"
+          @change="selectVideoSource"
         >
-          <option
-            v-for="videoSource in this.videoSources"
+          <option class=" text-black w-[150px]"
+            v-for="videoSource in videoSources"
             :key="videoSource.name"
             :value="videoSource.id"
-            @click="this.selectVideoSource"
           >
             {{ videoSource.name }}
           </option>
@@ -56,42 +50,54 @@
 </template>
 
 <script>
+import { onMounted, onUnmounted, reactive, ref } from "vue";
+import Btn_Record from "../components/icons/Btn_Record.vue";
+
 export default {
-  data() {
-    return {
-      videoSize: {
-        width: "100px",
-        height: "100px",
-      },
-      videoSources: [],
-      selectedVideoSource: null,
-    };
+  components:{
+    Btn_Record :Btn_Record
   },
 
-  // Methods are functions that mutate state and trigger updates.
-  // They can be bound as event handlers in templates.
-  methods: {
-    resizeVideoElement() {
-      let height = this.$refs["videoWrapper"].clientHeight;
-      let width = this.$refs["videoWrapper"].clientWidth;
+  setup(pros, ctx) {
+    const videoSize = reactive({ width: "100px", height: "100px" });
+    let trigger = ref(false);
+    let videoSources = ref([]);
+    let selectedVideoSource = ref(null);
+    let val = ref(0);
+    const videoWrapper = ref(null);
+    const video = ref(null);
+    let timerID = null;
+    const captureStream = () => {
+      console.log("click outside");
+    };
+
+    const resizeVideoElement = () => {
+      let height =videoWrapper.value.clientHeight 
+      let width = videoWrapper.value.clientWidth
       let h = Math.min(width / (16 / 9), height) * 0.9;
-      this.videoSize.width = h * (16 / 9) + "px";
-      this.videoSize.height = h + "px";
-    },
-    async selectVideoSource() {
-      console.log("selected Source id: ", this.selectedVideoSource);
+      videoSize.width = h * (16 / 9) + "px";
+      videoSize.height = h + "px";
+    };
+
+    async function getVideoSources() {
+      let sources= await window.$ipc.getVideoSources();
+      videoSources.value=sources;
+    }
+
+    async function selectVideoSource() {
+      console.log("selected Source id: ", selectedVideoSource.value);
       const constraints = {
-        // audio: {
-        //   mandatory: {
-        //     chromeMediaSource: "desktop",
-        //     chromeMediaSourceId: this.selectedVideoSource,
-        //   },
-        // },
-        audio:false,
+        audio: {
+          mandatory: {
+            chromeMediaSource: "desktop",
+            chromeMediaSourceId: selectedVideoSource.value,
+          },
+        },
+        audio: false,
         video: {
           mandatory: {
             chromeMediaSource: "desktop",
-            chromeMediaSourceId: this.selectedVideoSource,
+            chromeMediaSourceId: selectedVideoSource.value,
           },
         },
       };
@@ -100,42 +106,37 @@ export default {
       try {
         stream = await navigator.mediaDevices.getUserMedia(constraints);
         /* use the stream */
-        this.$refs["video"].srcObject = stream;
-        this.$refs["video"].play();
+        video.value.srcObject = stream;
+        video.value.play();
       } catch (err) {
         /* handle the error */
         console.log(err);
       }
-    },
-    async getVideoSources() {
-      //window.$ipc.popUpVideoSource();
-      this.videoSources = await window.$ipc.getVideoSources();
-      console.log(this.videoSources);
-      // const videoSources = await desktopCapturer.getSources({
-      //   types: ["screen", "windows"],
-      // });
+    }
 
-      // const videoOptionsMenu = Menu.buildFromTemplate(videoSources.map((source)=>{
-      //   return {
-      //     label:source.name,
-      //     click:()=>console.log(source)
-      //   }
-      // }))
+    onMounted(() => {
+      resizeVideoElement();
+      window.addEventListener("resize", resizeVideoElement);
+      //timerID =window.setInterval(getVideoSources,2000)
+    });
 
-      // videoOptionsMenu.popup();
-    },
-  },
+    onUnmounted(() => {
+      window.removeEventListener("resize", resizeVideoElement);
+      //window.clearInterval(timerID)
+    });
 
-  // Lifecycle hooks are called at different stages
-  // of a component's lifecycle.
-  // This function will be called when the component is mounted.
-  mounted() {
-    this.resizeVideoElement();
-    this.getVideoSources();
-    window.addEventListener("resize", this.resizeVideoElement);
-  },
-  unmounted() {
-    window.removeEventListener("resize", this.resizeVideoElement);
+    return {
+      videoSize,
+      trigger,
+      videoSources,
+      selectedVideoSource,
+      selectVideoSource,
+      getVideoSources,
+      val,
+      captureStream,
+      videoWrapper,
+      video,
+    };
   },
 };
 </script>
@@ -153,4 +154,8 @@ video {
   height: calc(var(--h) / var(--ratio));
   width: var(--h); */
 }
+
+/* select option{
+  width:150px;   
+} */
 </style>
