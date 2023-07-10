@@ -8,7 +8,6 @@ const {
 } = require("electron");
 const { writeFile } = require("fs");
 const path = require("path");
-const {outputFile}= require('fs-extra')
 const mode = app.commandLine.getSwitchValue("mode");
 
 function createWindow() {
@@ -29,12 +28,12 @@ function createWindow() {
   //win.loadFile('index.html')
   if (mode === "development") {
     win.loadURL("http://localhost:3000/");
-  } else if (mode === "deployment") {
+  } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 
   console.log("Current Mode:" + mode);
-
+  console.log(process.env);
   ipcMain.on("close-window", (event) => {
     console.log("Close App");
     app.quit();
