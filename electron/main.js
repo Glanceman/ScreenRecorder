@@ -6,8 +6,13 @@ const {
   Menu,
   dialog,
 } = require("electron");
+
+app.commandLine.appendSwitch("--in-process-gpu");
+
+
 const { writeFile } = require("fs");
 const path = require("path");
+
 const mode = app.commandLine.getSwitchValue("mode");
 
 function createWindow() {

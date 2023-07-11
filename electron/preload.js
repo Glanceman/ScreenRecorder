@@ -26,10 +26,12 @@ contextBridge.exposeInMainWorld("$ipc", {
     const blob = new Blob(data, {
       type: "video/webm",
     });
-    const reader = new FileReader();
     let buffer = Buffer.from(await blob.arrayBuffer());
     //ipcRenderer.invoke("saveFile", buffer);
     const path =await ipcRenderer.invoke("selectFilePath","webm");
-    writeFile(path,buffer,()=>{console.log("save")});
+    if(path!=undefined){
+      writeFile(path,buffer,()=>{console.log("save")});
+    }
   },
+
 });

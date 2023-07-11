@@ -74,7 +74,6 @@ export default {
     const captureStream = () => {
       if (trigger.value === true) {
         console.log("Record");
-        recordedChunks.length = 0; //clear array
         mediaRecorder.start();
       } else {
         console.log("Stop Record");
@@ -123,9 +122,14 @@ export default {
         console.log(err);
       }
 
+      if (trigger.value == true) {// stop the recording
+        mediaRecorder.stop();
+        trigger.val = false;
+      }
+
       mediaRecorder = new MediaRecorder(stream, {
         mimeType: "video/webm; codecs=vp9",
-        audio:true,
+        audio: true,
       });
       mediaRecorder.ondataavailable = onDataAvailableHandler;
       mediaRecorder.onstop = onStopHandler;
@@ -134,10 +138,11 @@ export default {
     function onDataAvailableHandler(e) {
       recordedChunks.push(e.data);
     }
-    function onStopHandler(e) {
+    async function onStopHandler(e) {
       // const buffer =ArrayBuffer.from(await blob.arrayBuffer());
       // const filePath = await window.$ipc.selectFilePath();
-      window.$ipc.saveFileBuffer(recordedChunks);
+      await window.$ipc.saveFileBuffer(recordedChunks);
+      recordedChunks.length=0;
     }
 
     onMounted(() => {
