@@ -63,18 +63,23 @@ export default {
     let trigger = ref(false);
     let videoSources = ref([]);
     let selectedVideoSource = ref(null);
+    let selectedStream = null;
+
     let val = ref(0);
     const videoWrapper = ref(null);
     const video = ref(null);
     let timerID = null;
 
+
+
     let mediaRecorder = null;
     const recordedChunks = [];
+    let timeSlice =5000;
 
     const captureStream = () => {
       if (trigger.value === true) {
         console.log("Record");
-        mediaRecorder.start();
+        mediaRecorder.start(timeSlice);
       } else {
         console.log("Stop Record");
         mediaRecorder.stop();
@@ -111,11 +116,11 @@ export default {
         },
       };
 
-      let stream = null;
+  
       try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        selectedStream = await navigator.mediaDevices.getUserMedia(constraints);
         /* use the stream */
-        video.value.srcObject = stream;
+        video.value.srcObject = selectedStream;
         video.value.play();
       } catch (err) {
         /* handle the error */
@@ -124,10 +129,16 @@ export default {
 
       if (trigger.value == true) {// stop the recording
         mediaRecorder.stop();
+        if(selectedStream){
+          const tracks = selectedStream.getTracks();
+          tracks.forEach(track => {
+            track.stop();
+          });
+        }
         trigger.val = false;
       }
 
-      mediaRecorder = new MediaRecorder(stream, {
+      mediaRecorder = new MediaRecorder(selectedStream, {
         mimeType: "video/webm; codecs=vp9",
         audio: true,
       });
@@ -138,9 +149,10 @@ export default {
     function onDataAvailableHandler(e) {
       recordedChunks.push(e.data);
     }
+
+
     async function onStopHandler(e) {
-      // const buffer =ArrayBuffer.from(await blob.arrayBuffer());
-      // const filePath = await window.$ipc.selectFilePath();
+      
       await window.$ipc.saveFileBuffer(recordedChunks);
       recordedChunks.length=0;
     }

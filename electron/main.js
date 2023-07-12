@@ -24,12 +24,12 @@ function createWindow() {
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      devTools: mode == "development" ? true : false,
+      devTools: mode == "development" ? true : true,
       nodeIntegration: true,
       contextIsolation: true,
     },
   });
-
+  
   //win.loadFile('index.html')
   if (mode === "development") {
     win.loadURL("http://localhost:3000/");
@@ -38,7 +38,7 @@ function createWindow() {
   }
 
   console.log("Current Mode:" + mode);
-  console.log(process.env);
+  //console.log(process.env);
   ipcMain.on("close-window", (event) => {
     console.log("Close App");
     app.quit();

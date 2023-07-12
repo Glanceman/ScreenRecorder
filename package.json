@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "electron/main.js",
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -19,6 +20,8 @@
   },
   "dependencies": {
     "bootstrap-icons": "^1.10.5",
+    "fix-webm-metainfo": "^1.0.8",
+    "ts-ebml": "^2.0.2",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
   },
