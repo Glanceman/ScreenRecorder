@@ -74,13 +74,12 @@ export default {
     let mediaRecorder = null;
     const recordedChunks = [];
     let timeSlice = 5000;
-    const MIMETYPE="video/webm; codecs=vp9";
-
+    const MIMETYPE = "video/webm; codecs=vp9";
 
     const captureStream = () => {
-      if(selectVideoSource.value==null){
+      if (selectedVideoSource.value == null) {
         console.log("Warning: no source is selected");
-        trigger.value=false;
+        trigger.value = false;
         return;
       }
       if (trigger.value === true) {
@@ -107,6 +106,16 @@ export default {
 
     async function selectVideoSource() {
       console.log("selected Source id: ", selectedVideoSource.value);
+
+      if (selectedStream) {
+        // stop previous stream if have
+        const tracks = selectedStream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+        });
+        selectedStream =null;
+      }
+
       const constraints = {
         audio: {
           mandatory: {
@@ -135,12 +144,6 @@ export default {
       if (trigger.value == true) {
         // stop the recording
         mediaRecorder.stop();
-        if (selectedStream) {
-          const tracks = selectedStream.getTracks();
-          tracks.forEach((track) => {
-            track.stop();
-          });
-        }
         trigger.val = false;
       }
 
@@ -162,6 +165,8 @@ export default {
       );
       await window.$ipc.saveFileBuffer(updateBlob);
       recordedChunks.length = 0;
+
+      mediaRecorder = null;
     }
 
     onMounted(() => {
