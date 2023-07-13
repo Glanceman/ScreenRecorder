@@ -61,13 +61,13 @@ contextBridge.exposeInMainWorld("$ipc", {
   saveFile: async (data) => await ipcRenderer.invoke("saveFile", data),
 
   saveFileBuffer: async (data) => {
-    console.log(data);
+    // console.log(data);
 
-    const blob = new Blob(data, {
-      type: "video/webm",
-    });
+    // const blob = new Blob(data, {
+    //   type: "video/webm",
+    // });
 
-    let buffer = Buffer.from(await blob.arrayBuffer());
+    let buffer = Buffer.from(await data.arrayBuffer());
     //ipcRenderer.invoke("saveFile", buffer);
     const path = await ipcRenderer.invoke("selectFilePath", "webm");
     if (path != undefined) {

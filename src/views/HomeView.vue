@@ -52,6 +52,7 @@
 <script>
 import { onMounted, onUnmounted, reactive, ref } from "vue";
 import Btn_Record from "../components/icons/Btn_Record.vue";
+import fixWebmDuration from "webm-duration-fix";
 
 export default {
   components: {
@@ -70,13 +71,18 @@ export default {
     const video = ref(null);
     let timerID = null;
 
-
-
     let mediaRecorder = null;
     const recordedChunks = [];
-    let timeSlice =5000;
+    let timeSlice = 5000;
+    const MIMETYPE="video/webm; codecs=vp9";
+
 
     const captureStream = () => {
+      if(selectVideoSource.value==null){
+        console.log("Warning: no source is selected");
+        trigger.value=false;
+        return;
+      }
       if (trigger.value === true) {
         console.log("Record");
         mediaRecorder.start(timeSlice);
@@ -116,7 +122,6 @@ export default {
         },
       };
 
-  
       try {
         selectedStream = await navigator.mediaDevices.getUserMedia(constraints);
         /* use the stream */
@@ -127,11 +132,12 @@ export default {
         console.log(err);
       }
 
-      if (trigger.value == true) {// stop the recording
+      if (trigger.value == true) {
+        // stop the recording
         mediaRecorder.stop();
-        if(selectedStream){
+        if (selectedStream) {
           const tracks = selectedStream.getTracks();
-          tracks.forEach(track => {
+          tracks.forEach((track) => {
             track.stop();
           });
         }
@@ -139,7 +145,7 @@ export default {
       }
 
       mediaRecorder = new MediaRecorder(selectedStream, {
-        mimeType: "video/webm; codecs=vp9",
+        mimeType: MIMETYPE,
         audio: true,
       });
       mediaRecorder.ondataavailable = onDataAvailableHandler;
@@ -150,11 +156,12 @@ export default {
       recordedChunks.push(e.data);
     }
 
-
     async function onStopHandler(e) {
-      
-      await window.$ipc.saveFileBuffer(recordedChunks);
-      recordedChunks.length=0;
+      const updateBlob = await fixWebmDuration(
+        new Blob([...recordedChunks], { type: MIMETYPE })
+      );
+      await window.$ipc.saveFileBuffer(updateBlob);
+      recordedChunks.length = 0;
     }
 
     onMounted(() => {
